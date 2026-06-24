@@ -8,12 +8,12 @@ import chatRouter from "./routes/chatRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import creditRouter from "./routes/creditRoutes.js";
 import { stripeWebhooks } from "./controllers/webhook.js";
+
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const app = express();
-// Middleware
-app.use(cors());
-app.use(express.json());
+
 await connectDB();
+
 // Stripe Webhooks
 app.post(
   "/api/stripe",
@@ -21,6 +21,9 @@ app.post(
   stripeWebhooks,
 );
 
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 // Routes
 app.get("/", (req, res) => res.send("Server is Live!"));
@@ -28,7 +31,17 @@ app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/credit", creditRouter);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// ⚠️ Vercel ko bolna ke body parsing khud na kare
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default app;
