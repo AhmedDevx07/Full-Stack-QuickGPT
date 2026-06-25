@@ -22,7 +22,7 @@ export const textMessageController = async (req, res) => {
       isImage: false,
     });
     const { choices } = await openai.chat.completions.create({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite",
       messages: [
         {
           role: "user",
@@ -40,6 +40,14 @@ export const textMessageController = async (req, res) => {
     await chat.save();
     await User.updateOne({ _id: userId }, { $inc: { credits: -1 } });
   } catch (error) {
+    console.error("textMessageController error:", error);
+    if (error.status === 429) {
+      return res.json({
+        success: false,
+        message:
+          "Daily AI usage limit reached. Please try again after some time or tomorrow.",
+      });
+    }
     res.json({ success: false, message: error.message });
   }
 };
@@ -68,7 +76,7 @@ export const imageMessageController = async (req, res) => {
     const encodedPrompt = encodeURIComponent(prompt);
     // Construct ImageKit AI generation URL
     const generatedImageUrl = `${process.env.IMAGEKIT_URL_ENDPOINT}/ik-genimg-prompt-${encodedPrompt}/quickgpt/${Date.now()}.png?tr=w-800,h-800`;
-    
+
     // Trigger generation by fetching from ImageKit
     const aiImageResponse = await axios.get(generatedImageUrl, {
       responseType: "arraybuffer",
@@ -97,4 +105,3 @@ export const imageMessageController = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
- 

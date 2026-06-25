@@ -41,9 +41,9 @@ const Plans = [
   },
 ];
 // API Controller for getting all plans
-export const getPlans = async (req, res) => {
+ export const getPlans = async (req, res) => {
   try {
-    res.json({ success: true, Plans });
+    res.json({ success: true, plans: Plans });   // ✅ key lowercase "plans"
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
